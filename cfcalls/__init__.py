@@ -1,7 +1,6 @@
+from cfcalls.calls_api import CallsApp
+from cfcalls.config import Config
 from flask import Flask, jsonify, request
-
-from cf_calls_getstreamio.calls_api import CallsApp
-from cf_calls_getstreamio.config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
