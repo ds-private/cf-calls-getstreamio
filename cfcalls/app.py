@@ -1,10 +1,12 @@
+from flask import Flask, jsonify, request
+
 from cfcalls.calls_api import CallsApp
 from cfcalls.config import Config
-from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 app.config.from_object(Config)
 calls_app = CallsApp(app.config["APP_ID"], app.config["BASE_PATH"])
+
 
 @app.route("/new_session", methods=["POST"])
 def create_new_session():
