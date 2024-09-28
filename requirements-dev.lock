@@ -38,6 +38,9 @@ flake8==7.1.1
     # via python-lsp-server
 flask==3.0.3
     # via cf-calls-getstreamio
+    # via flask-cors
+flask-cors==5.0.0
+    # via cf-calls-getstreamio
 idna==3.10
     # via requests
 importlib-metadata==8.5.0

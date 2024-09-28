@@ -1,10 +1,14 @@
 // src/App.tsx
 
-import React, { useEffect, useState } from 'react';
-import { useCallsContext } from './context/CallsContext';
-import { createNewSession, createNewTracks, sendAnswerSDP } from './services/callsApi';
-import VideoPlayer from './components/VideoPlayer';
-import { TrackObject } from './types';
+import React, { useEffect, useState } from "react";
+import { useCallsContext } from "./context/CallsContext";
+import {
+  createNewSession,
+  createNewTracks,
+  sendAnswerSDP,
+} from "./services/callsApi";
+import VideoPlayer from "./components/VideoPlayer";
+import { TrackObject } from "./types";
 
 const App: React.FC = () => {
   const {
@@ -13,22 +17,26 @@ const App: React.FC = () => {
     setLocalStream,
     setRemoteStream,
     sessionId,
-    setSessionId
+    setSessionId,
   } = useCallsContext();
-  const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
+  const [peerConnection, setPeerConnection] =
+    useState<RTCPeerConnection | null>(null);
 
   useEffect(() => {
     // Initialize Peer Connection and local stream
     const initializeConnection = async () => {
       const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.cloudflare.com:3478' }],
+        iceServers: [{ urls: "stun:stun.cloudflare.com:3478" }],
       });
       setPeerConnection(pc);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
       setLocalStream(stream);
 
-      stream.getTracks().forEach(track => {
+      stream.getTracks().forEach((track) => {
         pc.addTrack(track, stream);
       });
 
@@ -37,7 +45,13 @@ const App: React.FC = () => {
 
       const newSession = await createNewSession(offer.sdp!);
       setSessionId(newSession.sessionId!);
-      await pc.setRemoteDescription(new RTCSessionDescription(newSession.sessionDescription));
+
+      await pc.setRemoteDescription(
+        new RTCSessionDescription({
+          ...newSession.sessionDescription,
+          type: newSession.sessionDescription.type as RTCSdpType, // Type assertion
+        }),
+      );
 
       pc.ontrack = (event) => {
         const remoteStream = new MediaStream();
@@ -58,14 +72,21 @@ const App: React.FC = () => {
     if (peerConnection && sessionId) {
       // Manage additional tracks
       const handleNewTracks = async () => {
-        const tracks: TrackObject[] = localStream?.getTracks().map(track => ({
-          location: 'local',
-          trackName: track.id
-        })) || [];
+        const tracks: TrackObject[] =
+          localStream?.getTracks().map((track) => ({
+            location: "local",
+            trackName: track.id,
+          })) || [];
 
         const newTracks = await createNewTracks(tracks);
         if (newTracks.requiresImmediateRenegotiation) {
-          await peerConnection.setRemoteDescription(new RTCSessionDescription(newTracks.sessionDescription));
+          await peerConnection.setRemoteDescription(
+            new RTCSessionDescription({
+              ...newTracks.sessionDescription,
+              type: newTracks.sessionDescription.type as RTCSdpType, // Type assertion
+            }),
+          );
+
           const answer = await peerConnection.createAnswer();
           await peerConnection.setLocalDescription(answer);
           await sendAnswerSDP(answer.sdp!);

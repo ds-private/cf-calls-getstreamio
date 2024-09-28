@@ -4,7 +4,7 @@ export interface SessionDescription {
 }
 
 export interface TrackObject {
-  location: 'local' | 'remote';
+  location: "local" | "remote";
   mid?: string;
   sessionId?: string;
   trackName: string;
@@ -18,4 +18,3 @@ export interface CallsApiResponse {
   errorDescription?: string;
   requiresImmediateRenegotiation?: boolean;
 }
-

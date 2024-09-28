@@ -1,23 +1,25 @@
-import axios, { AxiosResponse } from 'axios';
-import { SessionDescription, TrackObject, CallsApiResponse } from '../types';
+import axios, { AxiosResponse } from "axios";
+import { TrackObject, CallsApiResponse } from "../types";
 
-const BASE_URL = 'http://localhost:5000'; 
+const BASE_URL = "http://localhost:5000";
 
-export const createNewSession = async (offerSDP: string): Promise<CallsApiResponse> => {
+export const createNewSession = async (
+  offerSDP: string,
+): Promise<CallsApiResponse> => {
   const response: AxiosResponse<CallsApiResponse> = await axios.post(
     `${BASE_URL}/new_session`,
-    { offer_sdp: offerSDP }
+    { offer_sdp: offerSDP },
   );
   return response.data;
 };
 
 export const createNewTracks = async (
   trackObjects: TrackObject[],
-  offerSDP?: string
+  offerSDP?: string,
 ): Promise<CallsApiResponse> => {
   const response: AxiosResponse<CallsApiResponse> = await axios.post(
     `${BASE_URL}/new_tracks`,
-    { track_objects: trackObjects, offer_sdp: offerSDP }
+    { track_objects: trackObjects, offer_sdp: offerSDP },
   );
   return response.data;
 };

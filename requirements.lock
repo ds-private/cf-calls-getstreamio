@@ -20,6 +20,9 @@ click==8.1.7
     # via flask
 flask==3.0.3
     # via cf-calls-getstreamio
+    # via flask-cors
+flask-cors==5.0.0
+    # via cf-calls-getstreamio
 idna==3.10
     # via requests
 itsdangerous==2.2.0

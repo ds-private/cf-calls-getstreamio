@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 interface VideoPlayerProps {
   stream: MediaStream | null;
@@ -14,8 +14,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ stream, muted = false }) => {
     }
   }, [stream]);
 
-  return <video ref={videoRef} autoPlay muted={muted} style={{ width: '100%' }} />;
+  return (
+    <video ref={videoRef} autoPlay muted={muted} style={{ width: "100%" }} />
+  );
 };
 
 export default VideoPlayer;
-

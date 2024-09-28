@@ -1,12 +1,16 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { CallsApiResponse, SessionDescription, TrackObject } from '../types';
+import React, { createContext, useState, useContext, ReactNode } from "react";
+import { CallsApiResponse, TrackObject } from "../types";
+import { createNewSession, createNewTracks } from "../services/callsApi";
 
 interface CallsContextProps {
   sessionId: string | null;
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   createSession: (offerSDP: string) => Promise<CallsApiResponse>;
-  createTracks: (trackObjects: TrackObject[], offerSDP?: string) => Promise<CallsApiResponse>;
+  createTracks: (
+    trackObjects: TrackObject[],
+    offerSDP?: string,
+  ) => Promise<CallsApiResponse>;
   setSessionId: React.Dispatch<React.SetStateAction<string | null>>;
   setLocalStream: React.Dispatch<React.SetStateAction<MediaStream | null>>;
   setRemoteStream: React.Dispatch<React.SetStateAction<MediaStream | null>>;
@@ -14,18 +18,27 @@ interface CallsContextProps {
 
 const CallsContext = createContext<CallsContextProps | undefined>(undefined);
 
-export const CallsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const CallsProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   // Add the necessary functions here for interacting with the API
   const createSession = async (offerSDP: string) => {
-    // Function to create session
+    const response = await createNewSession(offerSDP);
+    // Do any processing you need here
+    return response; // Ensure you return the response object
   };
 
-  const createTracks = async (trackObjects: TrackObject[], offerSDP?: string) => {
-    // Function to create tracks
+  const createTracks = async (
+    trackObjects: TrackObject[],
+    offerSDP?: string,
+  ) => {
+    const response = await createNewTracks(trackObjects, offerSDP);
+    // Do any processing you need here
+    return response; // Ensure you return the response object
   };
 
   return (
@@ -49,7 +62,7 @@ export const CallsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 export const useCallsContext = () => {
   const context = useContext(CallsContext);
   if (!context) {
-    throw new Error('useCallsContext must be used within a CallsProvider');
+    throw new Error("useCallsContext must be used within a CallsProvider");
   }
   return context;
 };

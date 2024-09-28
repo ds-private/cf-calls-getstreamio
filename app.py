@@ -1,4 +1,4 @@
-from cfcalls import app
+from cfcalls.app import app
+from flask_cors import CORS
 
-
-app = app
+CORS(app)
