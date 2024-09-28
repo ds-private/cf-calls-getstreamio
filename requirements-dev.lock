@@ -17,12 +17,15 @@ asttokens==2.4.1
 autopep8==2.0.4
     # via python-lsp-server
 black==24.8.0
+blinker==1.8.2
+    # via flask
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via black
+    # via flask
 decorator==5.1.1
     # via ipython
 dill==0.3.8
@@ -33,6 +36,8 @@ executing==2.1.0
     # via stack-data
 flake8==7.1.1
     # via python-lsp-server
+flask==3.0.3
+    # via cf-calls-getstreamio
 idna==3.10
     # via requests
 importlib-metadata==8.5.0
@@ -40,9 +45,16 @@ importlib-metadata==8.5.0
 ipython==8.27.0
 isort==5.13.2
     # via pylint
+itsdangerous==2.2.0
+    # via flask
 jedi==0.19.1
     # via ipython
     # via python-lsp-server
+jinja2==3.1.4
+    # via flask
+markupsafe==2.1.5
+    # via jinja2
+    # via werkzeug
 matplotlib-inline==0.1.7
     # via ipython
 mccabe==0.7.0
@@ -119,6 +131,8 @@ urllib3==2.2.3
     # via requests
 wcwidth==0.2.13
     # via prompt-toolkit
+werkzeug==3.0.4
+    # via flask
 whatthepatch==1.0.6
     # via python-lsp-server
 yapf==0.40.2

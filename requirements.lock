@@ -10,13 +10,28 @@
 #   universal: false
 
 -e file:.
+blinker==1.8.2
+    # via flask
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
+click==8.1.7
+    # via flask
+flask==3.0.3
+    # via cf-calls-getstreamio
 idna==3.10
     # via requests
+itsdangerous==2.2.0
+    # via flask
+jinja2==3.1.4
+    # via flask
+markupsafe==2.1.5
+    # via jinja2
+    # via werkzeug
 requests==2.32.3
     # via cf-calls-getstreamio
 urllib3==2.2.3
     # via requests
+werkzeug==3.0.4
+    # via flask
