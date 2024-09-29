@@ -34,6 +34,8 @@ markupsafe==2.1.5
     # via werkzeug
 requests==2.32.3
     # via cf-calls-getstreamio
+six==1.16.0
+    # via cf-calls-getstreamio
 urllib3==2.2.3
     # via requests
 werkzeug==3.0.4

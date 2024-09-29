@@ -114,6 +114,7 @@ rope==1.13.0
     # via python-lsp-server
 six==1.16.0
     # via asttokens
+    # via cf-calls-getstreamio
 snowballstemmer==2.2.0
     # via pydocstyle
 stack-data==0.6.3
