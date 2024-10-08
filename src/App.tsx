@@ -1,112 +1,153 @@
-// src/App.tsx
-
-import React, { useEffect, useState } from "react";
-import { useCallsContext } from "./context/CallsContext";
-import {
-  createNewSession,
-  createNewTracks,
-  sendAnswerSDP,
-} from "./services/callsApi";
-import VideoPlayer from "./components/VideoPlayer";
-import { TrackObject } from "./types";
+import React, { useEffect, useRef } from "react";
+import CallsApp from "./CallsApp";
 
 const App: React.FC = () => {
-  const {
-    localStream,
-    remoteStream,
-    setLocalStream,
-    setRemoteStream,
-    sessionId,
-    setSessionId,
-  } = useCallsContext();
-  const [peerConnection, setPeerConnection] =
-    useState<RTCPeerConnection | null>(null);
+  const appId = "fc04e02668707c25d98a008b4c168cf7";
+  const localVideoElement = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoElement = useRef<HTMLVideoElement | null>(null);
 
-  useEffect(() => {
-    // Initialize Peer Connection and local stream
-    const initializeConnection = async () => {
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.cloudflare.com:3478" }],
-      });
-      setPeerConnection(pc);
+  async function init() {
+    // Use Cloudflare's STUN server
+    let pc = new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: "stun:stun.cloudflare.com:3478",
+        },
+      ],
+      bundlePolicy: "max-bundle",
+    });
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      setLocalStream(stream);
+    // In order to successfully establish a peer connection, we need at least one track to publish.
+    // In this case, we create two: video & audio
+    const localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
 
-      stream.getTracks().forEach((track) => {
-        pc.addTrack(track, stream);
-      });
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      const newSession = await createNewSession(offer.sdp!);
-      setSessionId(newSession.sessionId!);
-
-      await pc.setRemoteDescription(
-        new RTCSessionDescription({
-          ...newSession.sessionDescription,
-          type: newSession.sessionDescription.type as RTCSdpType, // Type assertion
-        }),
-      );
-
-      pc.ontrack = (event) => {
-        const remoteStream = new MediaStream();
-        remoteStream.addTrack(event.track);
-        setRemoteStream(remoteStream);
-      };
-    };
-
-    initializeConnection();
-
-    return () => {
-      // Cleanup
-      peerConnection?.close();
-    };
-  }, [setLocalStream, setRemoteStream, setSessionId]);
-
-  useEffect(() => {
-    if (peerConnection && sessionId) {
-      // Manage additional tracks
-      const handleNewTracks = async () => {
-        const tracks: TrackObject[] =
-          localStream?.getTracks().map((track) => ({
-            location: "local",
-            trackName: track.id,
-          })) || [];
-
-        const newTracks = await createNewTracks(tracks);
-        if (newTracks.requiresImmediateRenegotiation) {
-          await peerConnection.setRemoteDescription(
-            new RTCSessionDescription({
-              ...newTracks.sessionDescription,
-              type: newTracks.sessionDescription.type as RTCSdpType, // Type assertion
-            }),
-          );
-
-          const answer = await peerConnection.createAnswer();
-          await peerConnection.setLocalDescription(answer);
-          await sendAnswerSDP(answer.sdp!);
-        }
-      };
-
-      handleNewTracks();
+    // Get the local video element in the HTML and set the source to show local stream
+    // const localVideoElement = document.getElementById("local-video");
+    // Ensure localVideoElement is not null or undefined before assigning
+    if (localVideoElement?.current) {
+      localVideoElement.current.srcObject = localStream;
     }
-  }, [peerConnection, sessionId, localStream]);
+
+    // Add sendonly trancievers to the PeerConnection
+    let transceivers = localStream.getTracks().map((track) =>
+      pc.addTransceiver(track, {
+        direction: "sendonly",
+      }),
+    );
+
+    // Create a instance of CallsApp (defined below). Please note that this is not an official SDK but just a demo showing the HTML API.
+    let app = new CallsApp(appId);
+
+    // Send the first offer and create a session. The returned sessionId is required to retrieve any track published by this peer
+    await pc.setLocalDescription(await pc.createOffer());
+    const newSessionResult = await app.newSession(
+      pc.localDescription?.sdp || "PC SDP NOT SET 50",
+    );
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(newSessionResult.sessionDescription),
+    );
+
+    // Make the peer connection was established
+    await new Promise<void>((resolve, reject) => {
+      pc.addEventListener("iceconnectionstatechange", (ev) => {
+        const target = ev.target as RTCPeerConnection; // Cast ev.target to RTCPeerConnection
+        if (target.iceConnectionState === "connected") {
+          resolve();
+        }
+        setTimeout(reject, 5000, "connect timeout");
+      });
+    });
+
+    // We associate a trackName to a transceiver identified by a mid (media ID). This way the track
+    // is remotely reachable by the tuple (sessionId, trackName)
+    let trackObjects = transceivers.map((transceiver) => {
+      return {
+        location: "local",
+        mid: transceiver.mid,
+        trackName: transceiver?.sender?.track?.id,
+      };
+    });
+
+    // Get local description, create a new track, set remote description with the response
+    await pc.setLocalDescription(await pc.createOffer());
+    const newLocalTracksResult = await app.newTracks(
+      trackObjects,
+      pc?.localDescription?.sdp,
+    );
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(newLocalTracksResult.sessionDescription),
+    );
+
+    let remoteTrackObjects = trackObjects.map((trackObject) => {
+      return {
+        location: "remote",
+        sessionId: app.sessionId,
+        trackName: trackObject.trackName,
+      };
+    });
+
+    // Prepare to receive the tracks before asking for them
+    const remoteTracksPromise: Promise<MediaStreamTrack[]> = new Promise(
+      (resolve) => {
+        let tracks: MediaStreamTrack[] = [];
+        pc.ontrack = (event) => {
+          tracks.push(event.track);
+          console.debug(`Got track mid=${event.track}`);
+          if (tracks.length >= 2) {
+            // remote video & audio are ready
+            resolve(tracks);
+          } else {
+            console.log("No Tracks found! SDKJ32");
+          }
+        };
+      },
+    );
+
+    // Calls API request to ask for the tracks
+    const newRemoteTracksResult = await app.newTracks(remoteTrackObjects);
+    if (newRemoteTracksResult.requiresImmediateRenegotiation) {
+      switch (newRemoteTracksResult.sessionDescription.type) {
+        case "offer":
+          // We let Cloudflare know we're ready to receive the tracks
+          await pc.setRemoteDescription(
+            new RTCSessionDescription(newRemoteTracksResult.sessionDescription),
+          );
+          await pc.setLocalDescription(await pc.createAnswer());
+          await app.sendAnswerSDP(pc.localDescription?.sdp || "");
+          break;
+        case "answer":
+          throw new Error("An offer SDP was expected");
+      }
+    }
+
+    // Once started receiving the tracks (video & audio) send the data to the video tag
+    const remoteTracks = await remoteTracksPromise;
+    // const remoteVideoElement = document.getElementById("remote-video");
+    const remoteStream = new MediaStream();
+    remoteStream.addTrack(remoteTracks[0]);
+    remoteStream.addTrack(remoteTracks[1]);
+    if (remoteVideoElement?.current?.srcObject) {
+      remoteVideoElement.current.srcObject = remoteStream;
+    }
+  }
+
+  useEffect(() => {
+    init();
+  }, []);
 
   return (
     <div className="grid">
       <h1>Calls Echo Demo</h1>
       <div>
         <h2>Local stream</h2>
-        <VideoPlayer stream={localStream} muted />
+        <video ref={localVideoElement} autoPlay muted></video>
       </div>
       <div>
         <h2>Remote echo stream</h2>
-        <VideoPlayer stream={remoteStream} />
+        <video ref={remoteVideoElement} autoPlay></video>
       </div>
     </div>
   );

@@ -12,8 +12,10 @@ class CallsApp:
             "content-type": "application/json",
             "Authorization": f'Bearer {current_app.config["APP_SECRET"]}',
         }
+        print(f"{self.session_id}, body, url, headers")
         response = requests.request(method, url, json=body, headers=headers)
-        response.raise_for_status()
+        print(response.content, response)
+        # response.raise_for_status()
         return response.json()
 
     def check_errors(self, result, tracks_count=0):
