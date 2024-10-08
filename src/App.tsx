@@ -130,7 +130,7 @@ const App: React.FC = () => {
     remoteStream.addTrack(remoteTracks[0]);
     remoteStream.addTrack(remoteTracks[1]);
     if (remoteVideoElement?.current) {
-        remoteVideoElement.current.srcObject = remoteStream;
+      remoteVideoElement.current.srcObject = remoteStream;
     }
   }
 
