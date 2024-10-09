@@ -5,39 +5,32 @@ from cfcalls.config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
-calls_app = CallsApp(app.config["APP_ID"], app.config["BASE_PATH"])
+calls_app = CallsApp()
 
 
-@app.route("/new_session", methods=["POST"])
+@app.route("/calls/sessions/new", methods=["POST"])
 def create_new_session():
-    data = request.json
-    offer_sdp = data.get("offer_sdp")
     try:
-        result = calls_app.new_session(offer_sdp)
-        return jsonify(result), 200
+        result = calls_app.new_session(request.json)
+        return result, 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 
-@app.route("/new_tracks", methods=["POST"])
-def create_new_tracks():
-    data = request.json
-    track_objects = data.get("track_objects")
-    offer_sdp = data.get("offer_sdp", None)
+@app.route("/calls/sessions/<session_id>/tracks/new", methods=["POST"])
+def create_new_tracks(session_id):
     try:
-        result = calls_app.new_tracks(track_objects, offer_sdp)
-        return jsonify(result), 200
+        result = calls_app.new_tracks(request.json, session_id)
+        return result, 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 
-@app.route("/send_answer", methods=["PUT"])
-def send_answer_sdp():
-    data = request.json
-    answer_sdp = data.get("answer_sdp")
+@app.route("/calls/sessions/<session_id>/renegotiate", methods=["PUT"])
+def renegotiate(session_id):
     try:
-        calls_app.send_answer_sdp(answer_sdp)
-        return jsonify({"status": "success"}), 200
+        result = calls_app.renegotiate(request.json, session_id)
+        return result, 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 

@@ -4,18 +4,15 @@ import {
   sendAnswerSDP,
 } from "./services/callsApi";
 
-const APP_SECRET =
-  "115a479edee8970eef9b3e6c6d56066dd1b2437a8961dc0990d13f53a4895f5b";
-
 export default class CallsApp {
   private prefixPath: string;
   sessionId?: string;
 
   constructor(
-    private appId: string,
-    private basePath: string = "https://rtc.live.cloudflare.com/v1",
+    private basePath: string = "http://localhost:5000",
+    // private basePath: string = "https://eo7t07xifmum2qz.m.pipedream.net"
   ) {
-    this.prefixPath = `${basePath}/apps/${appId}`;
+    this.prefixPath = `${basePath}/calls`;
   }
 
   // Method to send a request, with body and method as optional
@@ -27,11 +24,10 @@ export default class CallsApp {
     const request: RequestInit = {
       method: method,
       mode: "cors",
+      body: JSON.stringify(body),
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${APP_SECRET}`,
       },
-      body: JSON.stringify(body),
     };
     const response = await fetch(url, request);
     const result = await response.json();

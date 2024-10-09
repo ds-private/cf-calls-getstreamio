@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import CallsApp from "./CallsApp";
 
 const App: React.FC = () => {
-  const appId = "fc04e02668707c25d98a008b4c168cf7";
   const localVideoElement = useRef<HTMLVideoElement | null>(null);
   const remoteVideoElement = useRef<HTMLVideoElement | null>(null);
 
@@ -39,7 +38,7 @@ const App: React.FC = () => {
     );
 
     // Create a instance of CallsApp (defined below). Please note that this is not an official SDK but just a demo showing the HTML API.
-    let app = new CallsApp(appId);
+    let app = new CallsApp();
 
     // Send the first offer and create a session. The returned sessionId is required to retrieve any track published by this peer
     await pc.setLocalDescription(await pc.createOffer());
@@ -154,4 +153,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

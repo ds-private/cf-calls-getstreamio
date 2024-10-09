@@ -7,4 +7,8 @@ class Config:
         "CALLS_APP_SECRET",
         "1ea89966a9e2afaee1d03f12955fc597392876597ff9fa8b0785ba942b050c96",
     )
-    BASE_PATH = "https://rtc.live.cloudflare.com/v1"
+    BASE_PATH = os.environ.get(
+        "BASE_PATH",
+        "https://rtc.live.cloudflare.com/v1",
+        # "https://eo7t07xifmum2qz.m.pipedream.net"
+    )
