@@ -1,0 +1,329 @@
+syntax = "proto3";
+
+package cfcalls.protocols.models;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/models";
+option java_multiple_files = true;
+option java_outer_classname = "SfuModelsV1";
+option csharp_namespace = "Stream.Video.v1.Sfu.Models";
+
+enum PeerType {
+  // todo fix me (marcelo)
+  PEER_TYPE_PUBLISHER_UNSPECIFIED = 0;
+  PEER_TYPE_SUBSCRIBER = 1;
+}
+
+enum ConnectionQuality {
+  CONNECTION_QUALITY_UNSPECIFIED = 0;
+  CONNECTION_QUALITY_POOR = 1;
+  CONNECTION_QUALITY_GOOD = 2;
+  CONNECTION_QUALITY_EXCELLENT = 3;
+}
+
+enum VideoQuality {
+  VIDEO_QUALITY_LOW_UNSPECIFIED = 0;
+  VIDEO_QUALITY_MID = 1;
+  VIDEO_QUALITY_HIGH = 2;
+  VIDEO_QUALITY_OFF = 3;
+}
+
+enum TrackType {
+  TRACK_TYPE_UNSPECIFIED = 0;
+  TRACK_TYPE_AUDIO = 1;
+  TRACK_TYPE_VIDEO = 2;
+  TRACK_TYPE_SCREEN_SHARE = 3;
+  TRACK_TYPE_SCREEN_SHARE_AUDIO = 4;
+}
+
+// CallState is the current state of the call
+// as seen by an SFU.
+message CallState {
+  // participants is the list of participants in the call.
+  // In large calls, the list could be truncated in which
+  // case, the list of participants contains fewer participants
+  // than the counts returned in participant_count. Anonymous
+  // participants are **NOT** included in the list.
+  repeated Participant participants = 1;
+  // started_at is the time the call session actually started.
+  google.protobuf.Timestamp started_at = 2;
+  // participant_count contains the summary of the counts.
+  ParticipantCount participant_count = 3;
+  // the list of pins in the call.
+  // Pins are ordered in descending order (most important first).
+  repeated models.Pin pins = 4;
+}
+
+message ParticipantCount {
+  // Total number of participants in the call including
+  // the anonymous participants.
+  uint32 total = 1;
+  // Total number of anonymous participants in the call.
+  uint32 anonymous = 2;
+}
+
+message Pin {
+  // the user to pin
+  string user_id = 1;
+  // the user sesion_id to pin, if not provided, applies to all sessions
+  string session_id = 2;
+}
+
+// those who are online in the call
+message Participant {
+  string user_id = 1;
+  string session_id = 2;
+  // map of track id to track type
+  repeated TrackType published_tracks = 3;
+  google.protobuf.Timestamp joined_at = 4;
+  string track_lookup_prefix = 5;
+  ConnectionQuality connection_quality = 6;
+  bool is_speaking = 7;
+  bool is_dominant_speaker = 8;
+  float audio_level = 9;
+  string name = 10;
+  string image = 11;
+  google.protobuf.Struct custom = 12;
+  repeated string roles = 13;
+}
+
+message StreamQuality {
+  VideoQuality video_quality = 1;
+  string user_id = 2;
+}
+
+message VideoDimension {
+  uint32 width = 1;
+  uint32 height = 2;
+}
+
+message VideoLayer {
+  // for tracks with a single layer, this should be HIGH
+  string rid = 1;
+  VideoDimension video_dimension = 2;
+  // target bitrate, server will measure actual
+  uint32 bitrate = 4;
+  uint32 fps = 5;
+  VideoQuality quality = 6;
+}
+
+
+message Codec {
+  uint32 payload_type = 1;
+  string name = 2;
+  string fmtp_line = 3;
+  uint32 clock_rate = 4;
+  string encoding_parameters = 5;
+  repeated string feedbacks = 6;
+}
+
+message ICETrickle {
+  PeerType peer_type = 1;
+  string ice_candidate = 2;
+  string session_id = 3;
+}
+
+message TrackInfo {
+  string track_id = 1;
+  TrackType track_type = 2;
+  repeated VideoLayer layers = 5;
+  string mid = 6;
+  // for audio tracks
+  bool dtx = 7;
+  bool stereo = 8;
+  bool red = 9;
+  bool muted = 10;
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+
+  ERROR_CODE_PUBLISH_TRACK_NOT_FOUND = 100;
+  ERROR_CODE_PUBLISH_TRACKS_MISMATCH = 101;
+  ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER = 102;
+  ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = 103;
+  ERROR_CODE_LIVE_ENDED = 104;
+
+  ERROR_CODE_PARTICIPANT_NOT_FOUND = 200;
+  ERROR_CODE_PARTICIPANT_MIGRATING_OUT = 201;
+  ERROR_CODE_PARTICIPANT_MIGRATION_FAILED = 202;
+  ERROR_CODE_PARTICIPANT_MIGRATING = 203;
+  ERROR_CODE_PARTICIPANT_RECONNECT_FAILED = 204;
+  ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE = 205;
+
+  ERROR_CODE_CALL_NOT_FOUND = 300;
+
+  ERROR_CODE_REQUEST_VALIDATION_FAILED = 400;
+  ERROR_CODE_UNAUTHENTICATED = 401;
+  ERROR_CODE_PERMISSION_DENIED = 403;
+  ERROR_CODE_TOO_MANY_REQUESTS = 429;
+
+  ERROR_CODE_INTERNAL_SERVER_ERROR = 500;
+
+  ERROR_CODE_SFU_SHUTTING_DOWN = 600;
+
+  ERROR_CODE_SFU_FULL = 700;
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+  bool should_retry = 3;
+}
+
+message ClientDetails {
+  Sdk sdk = 1;
+  OS os = 2;
+  Browser browser = 3;
+  Device device = 4;
+}
+
+enum SdkType {
+  SDK_TYPE_UNSPECIFIED = 0;
+  SDK_TYPE_REACT = 1;
+  SDK_TYPE_ANGULAR = 2;
+  SDK_TYPE_ANDROID = 3;
+  SDK_TYPE_IOS = 4;
+  SDK_TYPE_FLUTTER = 5;
+  SDK_TYPE_REACT_NATIVE = 6;
+  SDK_TYPE_UNITY = 7;
+  SDK_TYPE_GO = 8;
+  SDK_TYPE_PLAIN_JAVASCRIPT = 9;
+}
+
+message Sdk {
+  SdkType type = 1;
+  string major = 2;
+  string minor = 3;
+  string patch = 4;
+}
+
+message OS {
+  string name = 1;
+  string version = 2;
+  string architecture = 3;
+}
+
+message Browser {
+  string name = 1;
+  string version = 2;
+}
+
+message Device {
+  string name = 1;
+  string version = 2;
+}
+
+message Call {
+  // the call type
+  string type = 1;
+  // the call id
+  string id = 2;
+  // the id of the user that created this call
+  string created_by_user_id = 3;
+  // the id of the current host for this call
+  string host_user_id = 4;
+  google.protobuf.Struct custom = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+enum TrackUnpublishReason {
+  // Default value which is used when the specific reason
+  // for muting the track is not known.
+  TRACK_UNPUBLISH_REASON_UNSPECIFIED = 0;
+  // Represents user muting their tracks.
+  TRACK_UNPUBLISH_REASON_USER_MUTED = 1;
+  // Represents muting the track because the permission to
+  // publish the track has been revoked.
+  TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED = 2;
+  // Represents muting the track due to moderation actions.
+  // This is different from permission revoked because the
+  // participant can unmute themselves here whereas in case
+  // of "permission revoke" it is not possible until the
+  // call permissions are updated.
+  TRACK_UNPUBLISH_REASON_MODERATION = 3;
+}
+
+// CallGrants represents the set of permissions given
+// to the user for the current call.
+message CallGrants {
+  bool can_publish_audio = 1;
+  bool can_publish_video = 2;
+  bool can_screenshare = 3;
+}
+
+// GoAwayReason represents the reason for the SFU to
+// disconnect the client.
+enum GoAwayReason {
+  GO_AWAY_REASON_UNSPECIFIED = 0;
+  GO_AWAY_REASON_SHUTTING_DOWN = 1;
+  GO_AWAY_REASON_REBALANCE = 2;
+}
+
+// CallEndedReason represents the reason for the call to end.
+enum CallEndedReason {
+  CALL_ENDED_REASON_UNSPECIFIED = 0;
+  CALL_ENDED_REASON_ENDED = 1;
+  CALL_ENDED_REASON_LIVE_ENDED = 2;
+  CALL_ENDED_REASON_KICKED = 3;
+  CALL_ENDED_REASON_SESSION_ENDED = 4;
+}
+
+// WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
+enum WebsocketReconnectStrategy {
+  WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED = 0;
+  // Sent after reaching the maximum reconnection attempts, or any other unrecoverable error leading to permanent disconnect.
+  WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT = 1;
+  // SDK should maintaining existing publisher/subscriber pc instances
+  // and establish a new WebSocket connection.
+  WEBSOCKET_RECONNECT_STRATEGY_FAST = 2;
+  // SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
+  // a completely new WebSocket connection, ensuring a comprehensive reset.
+  WEBSOCKET_RECONNECT_STRATEGY_REJOIN = 3;
+  // SDK should migrate to a new SFU instance
+  WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 4;
+};
+
+message InputDevices {
+  repeated string available_devices = 1;
+  string current_device = 2;
+  bool is_permitted = 3;
+}
+
+message AndroidState {
+  AndroidThermalState thermal_state = 1;
+  bool is_power_saver_mode = 2;
+}
+
+message AppleState {
+  AppleThermalState thermal_state = 1;
+
+  // https://developer.apple.com/documentation/foundation/processinfo/1617047-islowpowermodeenabled
+  bool is_low_power_mode_enabled = 2;
+}
+
+// AndroidThermalState is reported by the Android API. The full list of values is documented here
+// https://developer.android.com/reference/android/os/PowerManager.html#getCurrentThermalStatus()
+enum AndroidThermalState {
+  ANDROID_THERMAL_STATE_UNSPECIFIED = 0;
+  ANDROID_THERMAL_STATE_NONE = 1;
+  ANDROID_THERMAL_STATE_LIGHT = 2;
+  ANDROID_THERMAL_STATE_MODERATE = 3;
+  ANDROID_THERMAL_STATE_SEVERE = 4;
+  ANDROID_THERMAL_STATE_CRITICAL = 5;
+  ANDROID_THERMAL_STATE_EMERGENCY = 6;
+  ANDROID_THERMAL_STATE_SHUTDOWN = 7;
+}
+
+// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
+// The full list of states (enum) is available here: https://developer.apple.com/documentation/foundation/processinfo/thermalstate
+enum AppleThermalState {
+  APPLE_THERMAL_STATE_UNSPECIFIED = 0;
+  APPLE_THERMAL_STATE_NOMINAL = 1;
+  APPLE_THERMAL_STATE_FAIR = 2;
+  APPLE_THERMAL_STATE_SERIOUS = 3;
+  APPLE_THERMAL_STATE_CRITICAL = 4;
+}

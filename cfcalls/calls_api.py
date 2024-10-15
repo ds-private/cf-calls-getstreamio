@@ -1,5 +1,4 @@
 import requests
-from flask import current_app
 
 from cfcalls.config import Config
 

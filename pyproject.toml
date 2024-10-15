@@ -10,6 +10,7 @@ dependencies = [
     "flask>=3.0.3",
     "flask-cors>=5.0.0",
     "six>=1.16.0",
+    "protobuf>=5.28.2",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
