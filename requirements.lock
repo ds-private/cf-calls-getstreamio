@@ -23,6 +23,11 @@ flask==3.0.3
     # via flask-cors
 flask-cors==5.0.0
     # via cf-calls-getstreamio
+grpcio==1.66.2
+    # via cf-calls-getstreamio
+    # via grpcio-tools
+grpcio-tools==1.66.2
+    # via cf-calls-getstreamio
 idna==3.10
     # via requests
 itsdangerous==2.2.0
@@ -34,8 +39,11 @@ markupsafe==2.1.5
     # via werkzeug
 protobuf==5.28.2
     # via cf-calls-getstreamio
+    # via grpcio-tools
 requests==2.32.3
     # via cf-calls-getstreamio
+setuptools==75.1.0
+    # via grpcio-tools
 six==1.16.0
     # via cf-calls-getstreamio
 urllib3==2.2.3
