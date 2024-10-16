@@ -12,3 +12,4 @@ class Config:
         "https://rtc.live.cloudflare.com/v1",
         # "https://eo7t07xifmum2qz.m.pipedream.net"
     )
+    SOCK_SERVER_OPTIONS = {"ping_interval": 25}

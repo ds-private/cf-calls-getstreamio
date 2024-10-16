@@ -1,11 +1,28 @@
 import React, { useEffect, useRef } from "react";
 import CallsApp from "./CallsApp";
+import { StreamVideoClient, User } from "@stream-io/video-client";
 
 const App: React.FC = () => {
   const localVideoElement = useRef<HTMLVideoElement | null>(null);
   const remoteVideoElement = useRef<HTMLVideoElement | null>(null);
+  async function stream_init() {
+    const apiKey = "mmhfdzb5evj2";
+    const token =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0JvYmFfRmV0dCIsInVzZXJfaWQiOiJCb2JhX0ZldHQiLCJ2YWxpZGl0eV9pbl9zZWNvbmRzIjo2MDQ4MDAsImlhdCI6MTcyOTAyOTE2NSwiZXhwIjoxNzI5NjMzOTY1fQ.jrjg3gOOslK5s9HJ7yUd9bg9Ew5Tf7qQ0aFgeEfoaAc";
+    const user: User = { id: "Boba_Fett" };
 
-  async function init() {
+    const client = new StreamVideoClient({
+      apiKey,
+      token,
+      user,
+      options: { baseURL: "http://localhost:5000" },
+    });
+
+    const call = client.call("default", "lsAVy6CSeqdF");
+
+    call.join({ create: true });
+  }
+  async function raw_init() {
     // Use Cloudflare's STUN server
     let pc = new RTCPeerConnection({
       iceServers: [
@@ -134,7 +151,8 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    init();
+    // raw_init();
+    stream_init();
   }, []);
 
   return (

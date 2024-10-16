@@ -39,13 +39,18 @@ flake8==7.1.1
 flask==3.0.3
     # via cf-calls-getstreamio
     # via flask-cors
+    # via flask-sock
 flask-cors==5.0.0
+    # via cf-calls-getstreamio
+flask-sock==0.7.0
     # via cf-calls-getstreamio
 grpcio==1.66.2
     # via cf-calls-getstreamio
     # via grpcio-tools
 grpcio-tools==1.66.2
     # via cf-calls-getstreamio
+h11==0.14.0
+    # via wsproto
 idna==3.10
     # via requests
 importlib-metadata==8.5.0
@@ -122,6 +127,8 @@ rope==1.13.0
     # via python-lsp-server
 setuptools==75.1.0
     # via grpcio-tools
+simple-websocket==1.1.0
+    # via flask-sock
 six==1.16.0
     # via asttokens
     # via cf-calls-getstreamio
@@ -149,6 +156,8 @@ werkzeug==3.0.4
     # via flask
 whatthepatch==1.0.6
     # via python-lsp-server
+wsproto==1.2.0
+    # via simple-websocket
 yapf==0.40.2
     # via python-lsp-server
 zipp==3.20.2
