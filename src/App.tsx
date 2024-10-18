@@ -19,8 +19,10 @@ const App: React.FC = () => {
     });
 
     const call = client.call("default", "lsAVy6CSeqdF");
-
-    call.join({ create: true });
+    call.join({ create: true }).then(async () => {
+      call.camera.enable();
+      call.microphone.enable();
+    });
   }
   async function raw_init() {
     // Use Cloudflare's STUN server
