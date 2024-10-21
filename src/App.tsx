@@ -17,7 +17,7 @@ const App: React.FC = () => {
 			token,
 			user,
 			options: {
-				logLevel: "info",
+				logLevel: "debug",
 				// baseURL: "http://localhost:5000"
 			},
 		});
