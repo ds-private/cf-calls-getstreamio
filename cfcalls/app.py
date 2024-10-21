@@ -226,7 +226,7 @@ def join(call_id):
                         "password": "",
                     },
                     # TODO: Aditionally pass Cloudflare's TRUN details here:
-                    # https://developers.cloudflare.com/calls/turn/generate-credentials/ 
+                    # https://developers.cloudflare.com/calls/turn/generate-credentials/
                 ],
             },
             "stats_options": {"reporting_interval_ms": 10000},

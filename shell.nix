@@ -7,6 +7,7 @@
     rye
     python3
     nodejs_20
+    biome
   ]);
   runScript = "fish";
 }).env
