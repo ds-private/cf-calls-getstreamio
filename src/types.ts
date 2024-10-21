@@ -1,20 +1,20 @@
 export interface SessionDescription {
-  type: string;
-  sdp: string;
+	type: string;
+	sdp: string;
 }
 
 export interface TrackObject {
-  location: "local" | "remote";
-  mid?: string;
-  sessionId?: string;
-  trackName: string;
+	location: "local" | "remote";
+	mid?: string;
+	sessionId?: string;
+	trackName: string;
 }
 
 export interface CallsApiResponse {
-  sessionId?: string;
-  sessionDescription: SessionDescription;
-  tracks?: TrackObject[];
-  errorCode?: string;
-  errorDescription?: string;
-  requiresImmediateRenegotiation?: boolean;
+	sessionId?: string;
+	sessionDescription: SessionDescription;
+	tracks?: TrackObject[];
+	errorCode?: string;
+	errorDescription?: string;
+	requiresImmediateRenegotiation?: boolean;
 }
