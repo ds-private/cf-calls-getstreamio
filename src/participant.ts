@@ -1,9 +1,4 @@
-import {
-	Call,
-	hasScreenShare,
-	hasScreenShareAudio,
-	StreamVideoParticipant,
-} from "@stream-io/video-client";
+import { Call, StreamVideoParticipant } from "@stream-io/video-client";
 
 // The quickstart uses fixed video dimensions for simplification
 const videoDimension = {

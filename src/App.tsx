@@ -1,12 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { StreamVideoClient, type User } from "@stream-io/video-client";
 import { cleanupParticipant, renderParticipant } from "./participant";
 
 const App: React.FC = () => {
 	const participantsEl = useRef<HTMLDivElement | null>(null);
 
-	async function stream_init() {
+	const stream_init = useCallback(() => {
 		const apiKey = "mmhfdzb5evj2";
+		const callId = "FpDUjzLCEg4b";
 		const token =
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0JvYmFfRmV0dCIsInVzZXJfaWQiOiJCb2JhX0ZldHQiLCJ2YWxpZGl0eV9pbl9zZWNvbmRzIjo2MDQ4MDAsImlhdCI6MTcyOTAyOTE2NSwiZXhwIjoxNzI5NjMzOTY1fQ.jrjg3gOOslK5s9HJ7yUd9bg9Ew5Tf7qQ0aFgeEfoaAc";
 		const user: User = { id: "Boba_Fett" };
@@ -21,7 +22,6 @@ const App: React.FC = () => {
 			},
 		});
 
-		const callId = "FpDUjzLCEg4b";
 		const call = client.call("default", callId);
 
 		call.screenShare.enableScreenShareAudio();
@@ -66,7 +66,7 @@ const App: React.FC = () => {
 					});
 			}
 		});
-	}
+	}, []);
 
 	useEffect(() => {
 		stream_init();
